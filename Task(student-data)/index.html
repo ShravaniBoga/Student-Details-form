@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Details Form</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+
+      h2 {
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 10px;
+      }
+
+      #studentForm {
+        max-width: 500px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      #studentForm label {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      #studentForm input[type="text"],
+      #studentForm input[type="number"] {
+        width: calc(100% - 10px);
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      #studentForm button {
+        background-color: #4caf50;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      #studentForm button:hover {
+        background-color: #45a049;
+      }
+
+      #studentTable {
+        max-width: 800px;
+        margin: 20px auto;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      #studentTable th,
+      #studentTable td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+      }
+
+      #studentTable th {
+        background-color: #4caf50;
+        color: #fff;
+      }
+
+      #studentTable tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      #studentTable tbody tr:last-child {
+        border-bottom: none;
+      }
+
+      #studentTable button.delete {
+        background-color: #f44336;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      #studentTable button.delete:hover {
+        background-color: #e53935;
+      }
+
+      #studentTable button.edit {
+        background-color: #2196f3;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      #studentTable button.edit:hover {
+        background-color: #0b7dda;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Student Details Form</h2>
+    <form id="studentForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" required /><br />
+
+      <label for="class">Class:</label>
+      <input type="text" id="class" required /><br />
+
+      <label for="rollNumber">Roll Number:</label>
+      <input type="text" id="rollNumber" required /><br />
+
+      <label for="totalMarks">Total Marks:</label>
+      <input type="number" id="totalMarks" required /><br />
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <h2>Student Details</h2>
+    <table id="studentTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Roll Number</th>
+          <th>Total Marks</th>
+          <th>Percentage</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="studentList"></tbody>
+    </table>
+
+    <script>
+      document
+        .getElementById("studentForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Get form values
+          var name = document.getElementById("name").value;
+          var className = document.getElementById("class").value;
+          var rollNumber = document.getElementById("rollNumber").value;
+          var totalMarks = document.getElementById("totalMarks").value;
+          var percentage = (totalMarks / 500) * 100; // Assuming total marks is out of 500
+
+          // Create student object
+          var student = {
+            name: name,
+            class: className,
+            rollNumber: rollNumber,
+            totalMarks: totalMarks,
+            percentage: percentage.toFixed(2),
+          };
+
+          // Get existing students from local storage or create empty array
+          var students = JSON.parse(localStorage.getItem("students")) || [];
+
+          // Add new student to array
+          students.push(student);
+
+          // Save array back to local storage
+          localStorage.setItem("students", JSON.stringify(students));
+
+          // Clear form fields
+          document.getElementById("name").value = "";
+          document.getElementById("class").value = "";
+          document.getElementById("rollNumber").value = "";
+          document.getElementById("totalMarks").value = "";
+
+          // Refresh student list
+          displayStudents();
+        });
+
+      function displayStudents() {
+        var studentList = document.getElementById("studentList");
+        studentList.innerHTML = "";
+
+        var students = JSON.parse(localStorage.getItem("students")) || [];
+
+        students.forEach(function (student, index) {
+          var row = `<tr>
+                        <td>${student.name}</td>
+                        <td>${student.class}</td>
+                        <td>${student.rollNumber}</td>
+                        <td>${student.totalMarks}</td>
+                        <td>${student.percentage}%</td>
+                        <td><button class="edit" onclick="editStudent(${index})">Edit</button> <button class="delete" onclick="deleteStudent(${index})">Delete</button></td>
+                    </tr>`;
+          studentList.innerHTML += row;
+        });
+      }
+
+      function editStudent(index) {
+        var students = JSON.parse(localStorage.getItem("students")) || [];
+        var student = students[index];
+
+        // Populate form fields with student details
+        document.getElementById("name").value = student.name;
+        document.getElementById("class").value = student.class;
+        document.getElementById("rollNumber").value = student.rollNumber;
+        document.getElementById("totalMarks").value = student.totalMarks;
+
+        // Remove edited student from local storage
+        students.splice(index, 1);
+        localStorage.setItem("students", JSON.stringify(students));
+
+        // Refresh student list
+        displayStudents();
+      }
+
+      function deleteStudent(index) {
+        var students = JSON.parse(localStorage.getItem("students")) || [];
+
+        // Remove student from array
+        students.splice(index, 1);
+
+        // Save array back to local storage
+        localStorage.setItem("students", JSON.stringify(students));
+
+        // Refresh student list
+        displayStudents();
+      }
+
+      // Display students on page load
+      displayStudents();
+    </script>
+  </body>
+</html>
